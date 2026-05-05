@@ -13,6 +13,7 @@
 import os
 import logging
 
+import studiolibrary
 from studiolibrarymaya import baseitem
 
 try:
@@ -35,6 +36,28 @@ def load(path, *args, **kwargs):
     """Convenience function for loading an AnimItem."""
     AnimItem(path).load(*args, **kwargs)
 
+def findMirrorTable(path):
+    """
+    Get the mirror table object for this item.
+
+    :rtype: mutils.MirrorTable or None
+    """
+    mirrorTable = None
+
+    mirrorTablePaths = list(studiolibrary.walkup(
+            path,
+            match=lambda path: path.endswith(".mirror"),
+            depth=10,
+        )
+    )
+
+    if mirrorTablePaths:
+        vpath = mirrorTablePaths[0]
+        vpath = studiolibrary.utils.latestVersionPath(vpath)
+        path = os.path.join(vpath, "mirrortable.json")
+        mirrorTable = mutils.MirrorTable.fromPath(path)
+
+    return mirrorTable
 
 class AnimItem(baseitem.BaseItem):
 
@@ -42,6 +65,33 @@ class AnimItem(baseitem.BaseItem):
     EXTENSION = ".anim"
     ICON_PATH = os.path.join(os.path.dirname(__file__), "icons", "animation.png")
     TRANSFER_CLASS = mutils.Animation
+
+    def mirrorTableSearchAndReplace(self):
+        """
+        Get the values for search and replace from the mirror table.
+
+        :rtype: (str, str)
+        """
+        mirrorTable = findMirrorTable(self.path())
+
+        return mirrorTable.leftSide(), mirrorTable.rightSide()
+
+    def switchSearchAndReplace(self):
+        """
+        Switch the values of the search and replace field.
+
+        :rtype: (str, str)
+        """
+        values = self.currentLoadValue("searchAndReplace")
+        return values[1], values[0]
+
+    def clearSearchAndReplace(self):
+        """
+        Clear the search and replace field.
+
+        :rtype: (str, str)
+        """
+        return '', ''
 
     def imageSequencePath(self):
         """
@@ -103,6 +153,37 @@ class AnimItem(baseitem.BaseItem):
                 "items": ["replace", "replace all", "insert", "merge"],
                 "persistent": True,
             },
+            {
+                "name": "searchAndReplaceEnabled",
+                "title": "Search and Replace",
+                "type": "bool",
+                "inline": True,
+                "default": False,
+                "persistent": True,
+            },
+            {
+                "name": "searchAndReplace",
+                "title": "",
+                "type": "stringDouble",
+                "default": ("", ""),
+                "placeholder": ("search", "replace"),
+                "persistent": True,
+                "actions": [
+                    {
+                        "name": "Switch",
+                        "callback": self.switchSearchAndReplace,
+                    },
+                    {
+                        "name": "Clear",
+                        "callback": self.clearSearchAndReplace,
+                    },
+                    {
+                        "name": "From Mirror Table",
+                        "enabled": bool(findMirrorTable(self.path())),
+                        "callback": self.mirrorTableSearchAndReplace,
+                    },
+                ]
+            },
         ])
 
         return schema
@@ -123,7 +204,8 @@ class AnimItem(baseitem.BaseItem):
             option=kwargs.get("option"),
             connect=kwargs.get("connect"),
             mirrorTable=kwargs.get("mirrorTable"),
-            currentTime=kwargs.get("currentTime")
+            currentTime=kwargs.get("currentTime"),
+            searchAndReplace=kwargs.get("searchAndReplace"),
         )
 
     def saveSchema(self):
@@ -205,6 +287,37 @@ class AnimItem(baseitem.BaseItem):
                 "label": {
                     "visible": False
                 }
+            },
+            {
+                "name": "searchAndReplaceEnabled",
+                "title": "Search and Replace",
+                "type": "bool",
+                "inline": True,
+                "default": False,
+                "persistent": True,
+            },
+            {
+                "name": "searchAndReplace",
+                "title": "",
+                "type": "stringDouble",
+                "default": ("", ""),
+                "placeholder": ("search", "replace"),
+                "persistent": True,
+                "actions": [
+                    {
+                        "name": "Switch",
+                        "callback": self.switchSearchAndReplace,
+                    },
+                    {
+                        "name": "Clear",
+                        "callback": self.clearSearchAndReplace,
+                    },
+                    {
+                        "name": "From Mirror Table",
+                        "enabled": bool(findMirrorTable(self.path())),
+                        "callback": self.mirrorTableSearchAndReplace,
+                    },
+                ]
             },
         ]
 

@@ -741,7 +741,8 @@ class Animation(mutils.Pose):
             option=None,
             connect=False,
             mirrorTable=None,
-            currentTime=None
+            currentTime=None,
+            searchAndReplace=None,
     ):
         """
         Load the animation data to the given objects or namespaces.
@@ -781,8 +782,14 @@ class Animation(mutils.Pose):
         if mirrorTable:
             self.setMirrorTable(mirrorTable)
 
+        search = None
+        replace = None
+        if searchAndReplace:
+            search = searchAndReplace[0]
+            replace = searchAndReplace[1]
+
         valid = False
-        matches = list(mutils.matchNames(srcObjects=srcObjects, dstObjects=objects, dstNamespaces=namespaces))
+        matches = list(mutils.matchNames(srcObjects=srcObjects, dstObjects=objects, dstNamespaces=namespaces, search=search, replace=replace))
 
         for srcNode, dstNode in matches:
             if dstNode.exists():
