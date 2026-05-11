@@ -83,6 +83,19 @@ def matchInIndex(node, index):
     return result
 
 
+def getCtrlRigCharName(name):
+    """
+    :type name: str
+    :rtype: str
+    """
+
+    characterName = None
+    noNamespaceName = name.split(":")[-1]
+    if "_Ctrl_" in noNamespaceName:
+        characterName = noNamespaceName.split("_Ctrl_")[0]
+
+    return characterName
+
 def matchNames(srcObjects, dstObjects=None, dstNamespaces=None, search=None, replace=None):
     """
     :type srcObjects: list[str]
@@ -90,9 +103,15 @@ def matchNames(srcObjects, dstObjects=None, dstNamespaces=None, search=None, rep
     :type dstNamespaces: list[str]
     :rtype: list[(mutils.Node, mutils.Node)]
     """
+
+    srcCharName = getCtrlRigCharName(list(srcObjects)[0])
+    dstCharName = None
+
     results = []
     if dstObjects is None:
         dstObjects = []
+    else:
+        dstCharName = getCtrlRigCharName(dstObjects[0])
 
     srcGroup = groupObjects(srcObjects)
     srcNamespaces = srcGroup.keys()
@@ -122,6 +141,9 @@ def matchNames(srcObjects, dstObjects=None, dstNamespaces=None, search=None, rep
             for name in srcGroup[srcNamespace]:
 
                 srcNode = mutils.Node(name)
+
+                if srcCharName is not None and dstCharName is not None:
+                    name = name.replace(srcCharName, dstCharName)
 
                 if search is not None and replace is not None:
                     # Using the mirror table which supports * style replacing
@@ -153,6 +175,9 @@ def matchNames(srcObjects, dstObjects=None, dstNamespaces=None, search=None, rep
             i += 1
             for name in srcGroup[srcNamespace]:
                 srcNode = mutils.Node(name)
+
+                if srcCharName is not None and dstCharName is not None:
+                    name = name.replace(srcCharName, dstCharName)
 
                 if search is not None and replace is not None:
                     # Using the mirror table which supports * style replacing

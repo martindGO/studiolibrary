@@ -57,7 +57,7 @@ class SelectionSet(mutils.TransferObject):
         """
         validNodes = []
         dstObjects = objects
-        srcObjects = self.objects()
+        srcObjects = self.objects().keys()
 
         self.validate(namespaces=namespaces)
 

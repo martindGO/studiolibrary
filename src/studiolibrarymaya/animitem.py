@@ -92,6 +92,25 @@ class AnimItem(baseitem.BaseItem):
         :rtype: (str, str)
         """
         return '', ''
+    
+    def loadValidator(self, **values):
+        """
+        Using the validator to change the state of the search and replace option.
+
+        :type values: dict
+        :rtype: list[dict]
+        """
+
+        fields = [
+            {
+                "name": "searchAndReplace",
+                "visible": values.get("searchAndReplaceEnabled")
+            },
+        ]
+
+        fields.extend(super(AnimItem, self).loadValidator(**values))
+
+        return fields
 
     def imageSequencePath(self):
         """

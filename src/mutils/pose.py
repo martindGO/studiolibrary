@@ -455,7 +455,7 @@ class Pose(mutils.TransferObject):
             self._cacheKey = cacheKey
 
             dstObjects = objects
-            srcObjects = self.objects()
+            srcObjects = self.objects().keys()
             usingNamespaces = not objects and namespaces
 
             if mirrorTable:

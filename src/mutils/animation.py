@@ -322,6 +322,7 @@ def loadAnims(
     startFrame=None,
     mirrorTable=None,
     currentTime=None,
+    searchAndReplace=None,
     showDialog=False,
 ):
     """
@@ -336,6 +337,7 @@ def loadAnims(
     :type option: PasteOption
     :type currentTime: bool
     :type mirrorTable: bool
+    :type searchAndReplace: (str, str) or None
     :type showDialog: bool
     """
     isFirstAnim = True
@@ -387,6 +389,7 @@ def loadAnims(
             namespaces=namespaces,
             currentTime=currentTime,
             mirrorTable=mirrorTable,
+            searchAndReplace=searchAndReplace,
         )
 
         duration = anim.endFrame() - anim.startFrame()
